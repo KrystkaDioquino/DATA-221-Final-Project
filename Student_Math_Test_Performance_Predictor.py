@@ -1,12 +1,16 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+from sklearn.metrics import mean_squared_error, r2_score
 
 # DATASET PREPARATION
 
 # Load the dataset into pandas DataFrame
 df = pd.read_csv("StudentsPerformance.csv")
-
 
 # DATA CLEANING AND PROCESSING
 
@@ -38,7 +42,6 @@ df["parental level of education"] = df["parental level of education"].map(educat
 # Apply one-hot encoding to categorical variables without order
 df = pd.get_dummies(df, columns=["gender", "race/ethnicity", "lunch", "test preparation course"], drop_first=True)
 
-
 # DATA SPLITTING AND SCALING
 
 # Separate feature matrix (X) and target variable (y)
@@ -55,3 +58,5 @@ scaler = StandardScaler()
 # Use on Multiple Linear Regression, KNN Regressor and Neural Network Regressor only
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
+
+# Train neural network regressor model
