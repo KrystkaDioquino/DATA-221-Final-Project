@@ -52,3 +52,32 @@ y = df["math score"]
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
+
+# DECISION TREE REGRESSOR MODEL
+
+# Try different max_depth values to find best performance
+depths = [2, 3, 5, 10, None]
+
+print("\nDecision Tree Results:\n")
+
+for d in depths:
+    model = DecisionTreeRegressor(max_depth=d, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Predictions
+    y_pred = model.predict(X_test)
+    y_train_pred = model.predict(X_train)
+
+    # Evaluation metrics
+    mae = mean_absolute_error(y_test, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    r2 = r2_score(y_test, y_pred)
+
+    train_r2 = r2_score(y_train, y_train_pred)
+
+    print(f"Max Depth: {d}")
+    print(f"MAE: {mae}")
+    print(f"RMSE: {rmse}")
+    print(f"Test R2: {r2}")
+    print(f"Train R2: {train_r2}")
+    print("------------------------")
