@@ -41,3 +41,14 @@ df = pd.get_dummies(
     columns=["gender", "race/ethnicity", "lunch", "test preparation course"],
     drop_first=True
 )
+
+# DATA SPLITTING
+
+# Separate features (X) and target (y)
+X = df.drop("math score", axis=1)
+y = df["math score"]
+
+# Split into training and testing sets (80-20)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
