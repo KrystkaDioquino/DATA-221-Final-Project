@@ -18,12 +18,14 @@ print("Missing values:\n", df.isna().sum())
 # Check for duplicate rows
 print("Duplicates:", df.duplicated().any())
 
-# Remove reading and writing scores to prevent data leakage
-df = df.drop(columns=["reading score", "writing score"])
+
+# ===============================
+# VERSION A: WITHOUT reading/writing (MAIN MODEL)
+# ===============================
+
+df_A = df.drop(columns=["reading score", "writing score"])
 
 # ENCODING CATEGORICAL VARIABLES
-
-# Ordinal encoding for parental education
 education_hierarchy = {
     "some high school": 0,
     "high school": 1,
@@ -33,51 +35,80 @@ education_hierarchy = {
     "master's degree": 5
 }
 
-df["parental level of education"] = df["parental level of education"].map(education_hierarchy)
+df_A["parental level of education"] = df_A["parental level of education"].map(education_hierarchy)
 
-# One-hot encoding for remaining categorical variables
-df = pd.get_dummies(
-    df,
+df_A = pd.get_dummies(
+    df_A,
     columns=["gender", "race/ethnicity", "lunch", "test preparation course"],
     drop_first=True
 )
 
 # DATA SPLITTING
+X_A = df_A.drop("math score", axis=1)
+y_A = df_A["math score"]
 
-# Separate features (X) and target (y)
-X = df.drop("math score", axis=1)
-y = df["math score"]
-
-# Split into training and testing sets (80-20)
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
+X_train_A, X_test_A, y_train_A, y_test_A = train_test_split(
+    X_A, y_A, test_size=0.2, random_state=42
 )
 
-# DECISION TREE REGRESSOR MODEL
+# TRAIN BEST MODEL (max_depth = 3 from earlier)
+model_A = DecisionTreeRegressor(max_depth=3, random_state=42)
+model_A.fit(X_train_A, y_train_A)
 
-# Try different max_depth values to find best performance
-depths = [2, 3, 5, 10, None]
+pred_A = model_A.predict(X_test_A)
 
-print("\nDecision Tree Results:\n")
+# Evaluate A
+mae_A = mean_absolute_error(y_test_A, pred_A)
+rmse_A = np.sqrt(mean_squared_error(y_test_A, pred_A))
+r2_A = r2_score(y_test_A, pred_A)
 
-for d in depths:
-    model = DecisionTreeRegressor(max_depth=d, random_state=42)
-    model.fit(X_train, y_train)
 
-    # Predictions
-    y_pred = model.predict(X_test)
-    y_train_pred = model.predict(X_train)
+# ===============================
+# VERSION B: WITH reading/writing (COMPARISON)
+# ===============================
 
-    # Evaluation metrics
-    mae = mean_absolute_error(y_test, y_pred)
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    r2 = r2_score(y_test, y_pred)
+df_B = df.copy()
 
-    train_r2 = r2_score(y_train, y_train_pred)
+df_B["parental level of education"] = df_B["parental level of education"].map(education_hierarchy)
 
-    print(f"Max Depth: {d}")
-    print(f"MAE: {mae}")
-    print(f"RMSE: {rmse}")
-    print(f"Test R2: {r2}")
-    print(f"Train R2: {train_r2}")
-    print("------------------------")
+df_B = pd.get_dummies(
+    df_B,
+    columns=["gender", "race/ethnicity", "lunch", "test preparation course"],
+    drop_first=True
+)
+
+# DATA SPLITTING
+X_B = df_B.drop("math score", axis=1)
+y_B = df_B["math score"]
+
+X_train_B, X_test_B, y_train_B, y_test_B = train_test_split(
+    X_B, y_B, test_size=0.2, random_state=42
+)
+
+# SAME MODEL
+model_B = DecisionTreeRegressor(max_depth=3, random_state=42)
+model_B.fit(X_train_B, y_train_B)
+
+pred_B = model_B.predict(X_test_B)
+
+# Evaluate B
+mae_B = mean_absolute_error(y_test_B, pred_B)
+rmse_B = np.sqrt(mean_squared_error(y_test_B, pred_B))
+r2_B = r2_score(y_test_B, pred_B)
+
+
+# ===============================
+# FINAL COMPARISON OUTPUT
+# ===============================
+
+print("\n===== COMPARISON RESULTS =====\n")
+
+print("WITHOUT reading/writing:")
+print(f"MAE: {mae_A}")
+print(f"RMSE: {rmse_A}")
+print(f"R2: {r2_A}")
+
+print("\nWITH reading/writing:")
+print(f"MAE: {mae_B}")
+print(f"RMSE: {rmse_B}")
+print(f"R2: {r2_B}")
