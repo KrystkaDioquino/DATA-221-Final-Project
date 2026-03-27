@@ -1,6 +1,9 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 # DATASET PREPARATION
 
@@ -17,6 +20,9 @@ print("Missing values:\n",df.isna().sum())
 # Check for duplicate rows in the dataset
 # Helps avoid biased or repeated data
 print("Duplicates: ",df.duplicated().any())
+
+# Dataframe with reading and writing score for model comparison
+df_with_rw = df.copy()
 
 # Remove reading and writing scores to prevent data leakage
 # These features are highly correlated with the target
@@ -38,8 +44,13 @@ df["parental level of education"] = df["parental level of education"].map(educat
 # Apply one-hot encoding to categorical variables without order
 df = pd.get_dummies(df, columns=["gender", "race/ethnicity", "lunch", "test preparation course"], drop_first=True)
 
+# CORRELATION MAP
+plt.figure(figsize=(10,6))
+sns.heatmap(df.corr(), annot=True, fmt=".2f",annot_kws={"size":7})
+plt.title("Correlation Matrix (WITH Reading & Writing Scores)")
+plt.show()
 
-# DATA SPLITTING AND SCALING
+# DATA SPLITTING AND SCALING (without reading and writing score)
 
 # Separate feature matrix (X) and target variable (y)
 X = df.drop("math score", axis=1)
@@ -55,3 +66,19 @@ scaler = StandardScaler()
 # Use on Multiple Linear Regression, KNN Regressor and Neural Network Regressor only
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
+
+# DATA SPLITTING AND SCALING (with reading and writing score)
+
+df_with_rw["parental level of education"] = df_with_rw["parental level of education"].map(education_hierarchy)
+
+# Apply one-hot encoding to categorical variables without order
+df_with_rw = pd.get_dummies(df_with_rw, columns=["gender", "race/ethnicity", "lunch", "test preparation course"],
+                            drop_first=True, dtype=int)
+
+# Separate feature matrix (X) and target variable (y)
+X_with_rw = df_with_rw.drop("math score", axis=1)
+y_with_rw = df_with_rw["math score"]
+
+X_train_with_rw, X_test_with_rw, y_train_with_rw, y_test_with_rw = train_test_split(X_with_rw, y_with_rw, test_size=0.2, random_state=42)
+
+# CORRELATION MAP
