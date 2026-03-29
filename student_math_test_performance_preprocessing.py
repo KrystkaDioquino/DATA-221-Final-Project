@@ -49,13 +49,12 @@ df_with_rw = pd.get_dummies(df_with_rw, columns=["gender", "race/ethnicity", "lu
 
 
 
-
 # ---------- CORRELATION ANALYSIS ----------
 plt.figure(figsize=(10,6))
-sns.heatmap(df.corr(), annot=True, fmt=".2f",annot_kws={"size":7})
-plt.title("Correlation Matrix (WITH Reading & Writing Scores)")
+ax = sns.heatmap(df_with_rw.corr(), annot=True, fmt=".2f",annot_kws={"size":7}, cmap="Reds")
+plt.title("Correlation Matrix", fontsize=18)
+plt.tight_layout()
 plt.show()
-
 
 
 # ---------- DATA SPLITTING ----------
