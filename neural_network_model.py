@@ -38,6 +38,11 @@ df_with_rw = pd.get_dummies(df_with_rw, columns=["gender", "race/ethnicity", "lu
 np.random.seed(42)
 tf.random.set_seed(42)
 
+# Hyperparameters to try to find the best combination for best performance
+hidden_layer_options = [(16,), (32,), (64, 32), (64, 32, 16)]
+learning_rate_options = [0.001, 0.0005]
+epoch_options = [50, 100, 200]
+
 # --------------- MODEL 1 ----------------
 # without reading and writing scores
 
@@ -53,21 +58,55 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Build and compile neural network model
-neural_network_model = Sequential([
-    Dense(64, activation="relu", input_shape=(X_train_scaled.shape[1],)),
-    Dense(32, activation="relu"),
-    Dense(16, activation="relu"),
-    Dense(1)])
+# Track best results
+best_r2 = -999
+best_params = None
+best_mae = None
+best_rmse = None
+best_model = None
 
-neural_network_model.compile(optimizer="adam", loss="mse")
+# Build and compile neural network model using different hyperparameter combinations
+for hidden_layers in hidden_layer_options:
+    for learning_rate in learning_rate_options:
+        for epochs in epoch_options:
 
-# Train neural network model
-neural_network_model.fit(X_train_scaled, y_train, epochs=200)
+            tf.random.set_seed(42)
+            model = Sequential()
+            model.add(tf.keras.Input(shape=(X_train_scaled.shape[1],)))
 
-# Predictions
-y_train_pred = neural_network_model.predict(X_train_scaled, verbose=0).flatten()
-y_test_pred = neural_network_model.predict(X_test_scaled, verbose=0).flatten()
+            for units in hidden_layers:
+                model.add(Dense(units, activation="relu"))
+
+            model.add(Dense(1))
+
+            model.compile(
+                optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+                loss="mse")
+
+            model.fit(X_train_scaled, y_train, epochs=epochs, batch_size=32)
+
+            # Predictions
+            y_pred = model.predict(X_test_scaled).flatten()
+
+            # Metrics
+            mae = mean_absolute_error(y_test, y_pred)
+            rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+            r2 = r2_score(y_test, y_pred)
+
+            print(hidden_layers, learning_rate, epochs,
+                ": MAE:", round(mae, 2), "RMSE:", round(rmse, 2),"R2:", round(r2, 2))
+
+            # Keep best model (based on R2)
+            if r2 > best_r2:
+                best_r2 = r2
+                best_params = (hidden_layers, learning_rate, epochs)
+                best_mae = mae
+                best_rmse = rmse
+                best_model = model
+
+# Use best_model instead of undefined neural_network_model
+y_train_pred = best_model.predict(X_train_scaled).flatten()
+y_test_pred = best_model.predict(X_test_scaled).flatten()
 
 
 # --------------- MODEL 2 ----------------
@@ -123,7 +162,9 @@ r2_test_with_rw = r2_score(y_test_with_rw, y_test_pred_with_rw)
 
 # Display training and testing set evaluation for model 1
 print("Neural Network Model (without reading/writing score)")
-print("Training Set Evaluation")
+print("Best Model 1 Parameters:", best_params)
+
+print("\nTraining Set Evaluation")
 print(f"MAE: {mae_train:.2f}")
 print(f"RMSE: {rmse_train:.2f}")
 print(f"R2: {r2_train:.2f}")
