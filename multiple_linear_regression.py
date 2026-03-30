@@ -5,15 +5,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import numpy as np
 
-
 # DATASET PREPARATION:
 
 # load the dataset into a table
 df = pd.read_csv("StudentsPerformance.csv")
-
-# check for missing values and duplicates
-print("Missing values:\n", df.isna().sum())
-print("Duplicates:", df.duplicated().any())
 
 
 # DATA CLEANING:
