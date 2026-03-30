@@ -31,8 +31,10 @@ df_with_rw["parental level of education"] = df_with_rw["parental level of educat
 
 
 # Apply one-hot encoding to categorical variables without order
-df = pd.get_dummies(df, columns=["gender", "race/ethnicity", "lunch", "test preparation course"], drop_first=True, dtype=int)
-df_with_rw = pd.get_dummies(df_with_rw, columns=["gender", "race/ethnicity", "lunch", "test preparation course"], drop_first=True, dtype=int)
+df = pd.get_dummies(df, columns=["gender", "race/ethnicity", "lunch", "test preparation course"],
+                    drop_first=True, dtype=int)
+df_with_rw = pd.get_dummies(df_with_rw, columns=["gender", "race/ethnicity", "lunch", "test preparation course"], 
+                            drop_first=True, dtype=int)
 
 # Ensure consistent results across runs
 np.random.seed(42)
