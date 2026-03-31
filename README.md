@@ -51,17 +51,13 @@ cd DATA-221-Final-Project
 pip install pandas numpy matplotlib seaborn scikit-learn tensorflow
 
 3. Run models separately:
-- Linear Regression
-python linear_regression_model.py
+- Linear Regression: python linear_regression_model.py
 
-- KNN Model
-python knn_model.py
+- KNN Model: python knn_model.py
 
-- Decision Tree
-python decision_tree_model.py
+- Decision Tree: python decision_tree_model.py
 
-- Neural Network
-python neural_network_model.py
+- Neural Network: python neural_network_model.py
 
 # How to Reproduce Results
 - Ensure the dataset file is in the project folder
