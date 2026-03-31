@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 # Our data
 evaluation_metrics = {
-    'R2': [0.88, 0.14, 0.09, 0.19],
-    'RMSE': [5.37, 14.44, 14.85, 14.07],
-    'MAE': [4.18, 11.38, 11.81, 10.96]
+    'R2': [0.19, 0.14, 0.09, 0.19],
+    'RMSE': [14.05, 14.44, 14.85, 14.07],
+    'MAE': [11.16, 11.38, 11.81, 10.96]
 }
 model_names = ['Linear Regression', 'K Nearest Neighbour', 'Decision Tree', 'Neural Network']
 
